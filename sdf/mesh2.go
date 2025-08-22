@@ -55,7 +55,7 @@ func (a *lineInfo) minDistance2(p v2.Vec) float64 {
 		d2 = a.line[1].Sub(p).Length2()
 	} else {
 		// normal distance from p to line
-		dn := pa.Dot(v2.Vec{a.unitVector.Y, -a.unitVector.X})
+		dn := pa.Dot(v2.Vec{X: a.unitVector.Y, Y: -a.unitVector.X})
 		d2 = dn * dn
 	}
 	return d2
@@ -65,7 +65,7 @@ func (a *lineInfo) minDistance2(p v2.Vec) float64 {
 func (a *lineInfo) winding(p v2.Vec) int {
 	ay := a.line[0].Y
 	by := a.line[1].Y
-	dn := p.Sub(a.line[0]).Dot(v2.Vec{a.unitVector.Y, -a.unitVector.X})
+	dn := p.Sub(a.line[0]).Dot(v2.Vec{X: a.unitVector.Y, Y: -a.unitVector.X})
 	if ay <= p.Y {
 		if by > p.Y && dn < 0 { // upward crossing
 			return 1

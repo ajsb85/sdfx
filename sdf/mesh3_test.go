@@ -24,18 +24,18 @@ func Test_Mesh3_minDistance2(t *testing.T) {
 		d2 []float64
 	}{
 		{
-			Triangle3{{1, 2, 1}, {-4, -5, 1}, {17, -3, 1}},
-			[]v3.Vec{{1, 2, 3}, {-4, -5, 6}, {17, -3, -2}},
+			Triangle3{{X: 1, Y: 2, Z: 1}, {X: -4, Y: -5, Z: 1}, {X: 17, Y: -3, Z: 1}},
+			[]v3.Vec{{X: 1, Y: 2, Z: 3}, {X: -4, Y: -5, Z: 6}, {X: 17, Y: -3, Z: -2}},
 			[]float64{4, 25, 9},
 		},
 		{
-			Triangle3{{10, 0, 10}, {0, 0, -10}, {-10, 0, 10}},
-			[]v3.Vec{{0, 4, 0}, {0, 0, 0}, {11, 4, 11}, {0, 3, -11}, {-11, 7, 11}},
+			Triangle3{{X: 10, Y: 0, Z: 10}, {X: 0, Y: 0, Z: -10}, {X: -10, Y: 0, Z: 10}},
+			[]v3.Vec{{X: 0, Y: 4, Z: 0}, {X: 0, Y: 0, Z: 0}, {X: 11, Y: 4, Z: 11}, {X: 0, Y: 3, Z: -11}, {X: -11, Y: 7, Z: 11}},
 			[]float64{16, 0, 18, 10, 51},
 		},
 		{
-			Triangle3{{0, 0, 4}, {0, 6, -2}, {0, -6, -2}},
-			[]v3.Vec{{0, 0, 5}, {0, 2, 2}, {4, 3, 3}, {3, -3, 3}, {-2, 0, -3}},
+			Triangle3{{X: 0, Y: 0, Z: 4}, {X: 0, Y: 6, Z: -2}, {X: 0, Y: -6, Z: -2}},
+			[]v3.Vec{{X: 0, Y: 0, Z: 5}, {X: 0, Y: 2, Z: 2}, {X: 4, Y: 3, Z: 3}, {X: 3, Y: -3, Z: 3}, {X: -2, Y: 0, Z: -3}},
 			[]float64{1, 0, 18, 11, 5},
 		},
 	}
@@ -60,7 +60,7 @@ func Test_Mesh3_minDistance2(t *testing.T) {
 	// sanity test with random triangles
 	const boxSize = 100.0
 	const d2Max = 3.0 * (boxSize * boxSize)
-	b := NewBox3(v3.Vec{0, 0, 0}, v3.Vec{100, 100, 100})
+	b := NewBox3(v3.Vec{X: 0, Y: 0, Z: 0}, v3.Vec{X: 100, Y: 100, Z: 100})
 	for i := 0; i < 10000; i++ {
 		x := b.RandomTriangle()
 		ti := newTriangleInfo(&x)

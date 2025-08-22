@@ -9,6 +9,8 @@
 package sdf
 
 import (
+	"math"
+
 	v2 "github.com/deadsy/sdfx/vec/v2"
 	v3 "github.com/deadsy/sdfx/vec/v3"
 )
@@ -32,9 +34,9 @@ func newTriangleInfo(t *Triangle3) *triangleInfo {
 	x2 := m.MulPosition(t[2]) // maps to xy plane
 
 	// triangle vertices on xy plane
-	t0 := v2.Vec{0, 0}
-	t1 := v2.Vec{x1.X, 0}
-	t2 := v2.Vec{x2.X, x2.Y}
+	t0 := v2.Vec{X: 0, Y: 0}
+	t1 := v2.Vec{X: x1.X, Y: 0}
+	t2 := v2.Vec{X: x2.X, Y: x2.Y}
 
 	// triangle edge vectors
 	e0 := t1.Sub(t0).Normalize()
@@ -42,9 +44,9 @@ func newTriangleInfo(t *Triangle3) *triangleInfo {
 	e2 := t0.Sub(t2).Normalize()
 
 	// normals to triangle edges
-	n0 := v2.Vec{e0.Y, -e0.X}
-	n1 := v2.Vec{e1.Y, -e1.X}
-	n2 := v2.Vec{e2.Y, -e2.X}
+	n0 := v2.Vec{X: e0.Y, Y: -e0.X}
+	n1 := v2.Vec{X: e1.Y, Y: -e1.X}
+	n2 := v2.Vec{X: e2.Y, Y: -e2.X}
 
 	return &triangleInfo{
 		m: m,
@@ -73,7 +75,7 @@ func (a *triangleInfo) minDistance2(p v3.Vec) float64 {
 	p = a.m.MulPosition(p)
 
 	// pXY is the closest point on the XY plane
-	pXY := v2.Vec{p.X, p.Y}
+	pXY := v2.Vec{X: p.X, Y: p.Y}
 
 	// pXY wrt the triangle vertices
 	pXY0 := pXY.Sub(a.t[0])
@@ -139,8 +141,8 @@ func (a *triangleInfo) minDistance2(p v3.Vec) float64 {
 
 // MeshSDF3 is an SDF3 made from a set of 3d triangles.
 type MeshSDF3 struct {
-	mesh []*Triangle3
-	bb   Box3 // bounding box
+	mesh []*triangleInfo // Pre-calculated triangle info
+	bb   Box3            // bounding box
 }
 
 // Mesh3D returns an SDF3 made from a set of triangles.
@@ -157,15 +159,24 @@ func Mesh3D(mesh []*Triangle3) (SDF3, error) {
 	}
 
 	return &MeshSDF3{
-		mesh: mesh,
+		mesh: convertTriangles(mesh),
 		bb:   bb,
 	}, nil
 }
 
-// Evaluate returns the minimum distance for a 2d mesh.
+// Evaluate returns the minimum distance for a 3d mesh.
 func (s *MeshSDF3) Evaluate(p v3.Vec) float64 {
-	// TODO
-	return 0
+	// TODO: This should be sped up with an octree. For now, it uses the slow method.
+	minD2 := math.MaxFloat64
+	for _, t := range s.mesh {
+		d2 := t.minDistance2(p)
+		if d2 < minD2 {
+			minD2 = d2
+		}
+	}
+	// TODO: This is an unsigned distance. The sign of the SDF for a
+	// closed mesh needs to be determined (e.g., via ray casting).
+	return math.Sqrt(minD2)
 }
 
 // BoundingBox returns the bounding box of a 3d mesh.
@@ -178,8 +189,8 @@ func (s *MeshSDF3) BoundingBox() Box3 {
 
 // MeshSDF3Slow is an SDF3 made from a set of 3d triangles.
 type MeshSDF3Slow struct {
-	mesh []*Triangle3
-	bb   Box3 // bounding box
+	mesh []*triangleInfo // Pre-calculated triangle info
+	bb   Box3            // bounding box
 }
 
 // Mesh3DSlow returns an SDF3 made from a set of triangles.
@@ -196,15 +207,23 @@ func Mesh3DSlow(mesh []*Triangle3) (SDF3, error) {
 	}
 
 	return &MeshSDF3Slow{
-		mesh: mesh,
+		mesh: convertTriangles(mesh),
 		bb:   bb,
 	}, nil
 }
 
-// Evaluate returns the minimum distance for a 2d mesh.
+// Evaluate returns the minimum distance for a 3d mesh.
 func (s *MeshSDF3Slow) Evaluate(p v3.Vec) float64 {
-	// TODO
-	return 0
+	minD2 := math.MaxFloat64
+	for _, t := range s.mesh {
+		d2 := t.minDistance2(p)
+		if d2 < minD2 {
+			minD2 = d2
+		}
+	}
+	// TODO: This is an unsigned distance. The sign of the SDF for a
+	// closed mesh needs to be determined (e.g., via ray casting).
+	return math.Sqrt(minD2)
 }
 
 // BoundingBox returns the bounding box of a 3d mesh.

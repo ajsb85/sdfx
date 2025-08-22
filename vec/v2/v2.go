@@ -169,6 +169,25 @@ func (a VecSet) Min() Vec {
 	return vmin
 }
 
+// IsClosed returns true if the VecSet is empty or the first and last vectors are equal within the given tolerance.
+func (a VecSet) IsClosed(tolerance float64) bool {
+	if len(a) == 0 {
+		return true
+	}
+	return a[0].Equals(a[len(a)-1], tolerance)
+}
+
+// Close returns a new VecSet with the last vector set equal to the first if not already closed (within tolerance).
+func (a VecSet) Close(tolerance float64) VecSet {
+	if len(a) == 0 {
+		return a
+	}
+	if a.IsClosed(tolerance) {
+		return a
+	}
+	return append(a, a[0])
+}
+
 // Max return the maximum components of a set of vectors.
 func (a VecSet) Max() Vec {
 	vmax := a[0]
